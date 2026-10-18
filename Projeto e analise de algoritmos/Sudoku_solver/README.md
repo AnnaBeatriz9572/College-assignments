@@ -1,143 +1,151 @@
-# Sudoku Solver 🧩
+# Resolvedor de Sudoku 🧩
 
-Hi everyone! 👋
+Olá, pessoal! 👋
 
-This project started with a challenge from my professor. During class, we were watching a video from **Computerphile**, and he suggested that we try building our own Sudoku solver and see what we could improve along the way.
+Este projeto surgiu a partir de um desafio proposto pelo meu professor. Durante uma aula, estávamos assistindo a um vídeo do canal **Computerphile**, quando ele sugeriu que tentássemos desenvolver nosso próprio resolvedor de Sudoku e explorar possíveis melhorias ao longo do processo.
 
-That challenge caught my attention, so I decided to give it a try! I built this project in Python using a Jupyter Notebook, working through the solving logic and adding checks to make sure the starting grid follows Sudoku rules.
+O desafio despertou minha curiosidade, então decidi colocá-lo em prática! Desenvolvi o projeto em **Python**, utilizando um **Jupyter Notebook**, com foco na implementação da lógica de resolução e na criação de verificações para garantir que a matriz inicial respeite as regras do Sudoku.
 
-## What does it do?
+## O que o programa faz?
 
-The program solves standard **9×9 Sudoku puzzles** using **recursive backtracking**. It tries possible numbers, explores where those choices lead, and goes back whenever it needs to try a different path.
+O programa resolve quebra-cabeças tradicionais de **Sudoku 9×9** utilizando a técnica de **backtracking recursivo** (retrocesso).
 
-Here’s how each part works!
+O algoritmo testa os números possíveis em cada posição vazia, explora as consequências de cada escolha e retorna às etapas anteriores sempre que encontra um caminho que não leva a uma solução.
 
-## Step 1 — Representing the puzzle
+A seguir, explico como cada parte funciona!
 
-The puzzle is stored in a variable called `grid`, which is a list containing nine other lists.
+## Etapa 1 — Representação do Sudoku
 
-Each inner list represents a row, and each value represents a cell:
+O Sudoku é armazenado em uma variável chamada `grid`, que consiste em uma lista contendo outras nove listas.
 
-- Numbers from `1` to `9` are the clues already provided.
-- `0` represents an empty cell that the solver needs to fill.
+Cada lista interna representa uma linha, e cada valor corresponde a uma célula da matriz:
 
-Throughout the code, `y` represents the row index, `x` represents the column index, and `n` is the number being tested.
+- Números de `1` a `9` representam os valores já fornecidos no Sudoku.
+- O número `0` representa uma célula vazia que precisa ser preenchida.
 
-## Step 2 — Checking the grid size
+Ao longo do código, `y` representa o índice da linha, `x` representa o índice da coluna e `n` corresponde ao número que está sendo testado.
 
-Before looking for a solution, `check_matrix()` checks whether the puzzle has:
+## Etapa 2 — Verificação das dimensões da matriz
 
-- Exactly nine rows.
-- Exactly nine values in every row.
+Antes de iniciar a busca por uma solução, a função `check_matrix()` verifica se o Sudoku possui:
 
-This makes sure the solver receives the dimensions it expects before accessing individual cells.
+- Exatamente nove linhas.
+- Exatamente nove valores em cada linha.
 
-## Step 3 — Checking whether a number fits
+Essa verificação garante que o algoritmo receba uma matriz com as dimensões esperadas antes de acessar suas células.
 
-The function `possible(y, x, n)` checks whether the number `n` can be placed in an empty cell.
+## Etapa 3 — Verificação dos números possíveis
 
-It checks three places:
+A função `possible(y, x, n)` verifica se o número `n` pode ser inserido em uma determinada célula vazia.
 
-1. **The row:** the number must not already appear in that row.
-2. **The column:** the number must not already appear in that column.
-3. **The 3×3 box:** the number must not already appear inside the same box.
+Para isso, são realizadas três verificações:
 
-To find where the box begins, the code uses:
+1. **Linha:** o número não pode estar presente na mesma linha.
+2. **Coluna:** o número não pode estar presente na mesma coluna.
+3. **Bloco 3×3:** o número não pode estar presente no mesmo bloco.
+
+Para identificar onde começa o bloco 3×3 correspondente à célula analisada, utilizamos:
 
 ```python
 y0 = (y // 3) * 3
 x0 = (x // 3) * 3
 ```
 
-With indexes starting at zero, these calculations give the starting row and column of the box containing the cell.
+Como os índices começam em zero, esses cálculos determinam a linha e a coluna iniciais do bloco ao qual a célula pertence.
 
-If the number passes all three checks, the function returns `True`. Otherwise, it returns `False`.
+Se o número respeitar as três condições, a função retorna `True`. Caso contrário, retorna `False`.
 
-## Step 4 — Validating the starting clues
+## Etapa 4 — Validação dos números iniciais
 
-Checking new candidates is only part of the job. The numbers already written in the puzzle also need to follow the rules!
+Verificar os novos números não é suficiente. Também precisamos garantir que os valores já presentes no Sudoku respeitem suas regras!
 
-The function `check_sudoku()` visits every cell and checks whether its value is an integer between `0` and `9`.
+A função `check_sudoku()` percorre todas as células e verifica se cada valor é um número inteiro entre `0` e `9`.
 
-For each filled cell, it then:
+Para cada célula preenchida, a função:
 
-1. Saves the original number.
-2. Temporarily replaces it with `0`.
-3. Calls `possible()` to check for conflicts.
-4. Puts the original number back before continuing or returning `False`.
+1. Armazena temporariamente o número original.
+2. Substitui esse número por `0`.
+3. Chama a função `possible()` para verificar possíveis conflitos.
+4. Restaura o número original antes de continuar ou retornar `False`.
 
-Temporarily removing the number matters because otherwise `possible()` would find that same number in its own cell and incorrectly treat it as a repetition.
+A substituição temporária é importante porque, caso contrário, a função `possible()` encontraria o próprio número na célula analisada e o identificaria incorretamente como uma repetição.
 
-The validation preserves the original clues, including when it finds an invalid puzzle.
+Dessa forma, a validação mantém os valores originais do Sudoku, inclusive quando identifica uma matriz inválida.
 
-## Step 5 — Searching for a solution
+## Etapa 5 — Busca por uma solução
 
-The `solve()` function first calls the validation functions.
+A função `solve()` começa executando as funções de validação.
 
-If the grid is invalid, it prints an error message. Otherwise, it scans the grid until it finds an empty cell.
+Se a matriz for inválida, o programa exibe uma mensagem de erro. Caso contrário, percorre a matriz até encontrar uma célula vazia.
 
-For that cell, it tries the numbers from `1` to `9`. Whenever `possible()` accepts a candidate, the solver places it in the grid and calls `solve()` again.
+Ao encontrar essa célula, o algoritmo testa os números de `1` a `9`.
 
-That recursive call continues the search with the newly filled cell in place.
+Sempre que a função `possible()` identifica um número válido, o algoritmo o insere na matriz e realiza uma nova chamada à função `solve()`.
 
-## Step 6 — Going back and trying another path
+Essa chamada recursiva continua a busca considerando o número que acabou de ser inserido.
 
-A number can fit in the current cell and still lead to a dead end later.
+## Etapa 6 — Retrocesso e tentativa de novos caminhos
 
-When a recursive call finishes, this line clears the number that was being tested:
+Um número pode ser válido para uma determinada célula, mas ainda assim levar a uma situação sem solução nas próximas etapas.
+
+Quando uma chamada recursiva termina, a seguinte instrução remove o número que estava sendo testado:
 
 ```python
 grid[y][x] = 0
 ```
 
-The solver can then try the next candidate.
+Assim, o algoritmo pode testar o próximo candidato.
 
-This process is called **backtracking**: make a choice, explore the possibilities, undo the choice, and try another one.
+Esse processo é chamado de **backtracking**: realizar uma escolha, explorar suas possibilidades, desfazer a escolha e tentar outro caminho.
 
-## Step 7 — Displaying the results
+## Etapa 7 — Exibição dos resultados
 
-When the solver reaches a grid without empty cells, it prints the completed puzzle using NumPy:
+Quando o algoritmo encontra uma matriz sem células vazias, ele exibe o Sudoku completo utilizando o NumPy:
 
 ```python
 print(np.matrix(grid))
 ```
 
-The search then continues, so a puzzle with multiple solutions can produce multiple completed grids.
+A busca continua após encontrar uma solução. Portanto, caso o Sudoku possua múltiplas soluções, o programa poderá apresentar diferentes matrizes completas.
 
-After the search finishes:
+Ao finalizar a execução:
 
-- `grid` returns to its original state.
-- `solve()` returns `None`.
-- If a valid puzzle has no solution, nothing is printed.
+- A variável `grid` retorna ao seu estado original.
+- A função `solve()` retorna `None`.
+- Se o Sudoku for válido, mas não possuir solução, nenhuma matriz será exibida.
 
-## Want to try it?
+## Como executar o projeto?
 
-You’ll need **Python 3**, **NumPy**, and **Jupyter Notebook**.
+Para executar o resolvedor, você precisará de **Python 3**, **NumPy** e **Jupyter Notebook**.
 
-Install the dependencies:
+Primeiro, instale as dependências:
 
 ```bash
 python -m pip install numpy notebook
 ```
 
-Then open the notebook:
+Em seguida, abra o notebook:
 
 ```bash
 jupyter notebook resolvedor_sudoku.ipynb
 ```
 
-Run the import cell, define your puzzle in `grid`, and run the function definition cells. Then call:
+Execute a célula de importação, defina o Sudoku na variável `grid` e execute as células que contêm as funções.
+
+Depois, basta chamar:
 
 ```python
 solve()
 ```
 
-To try another puzzle, assign it to `grid` and call `solve()` again.
+Para testar outro Sudoku, atribua uma nova matriz à variável `grid` e execute novamente a função `solve()`.
 
-## What I’m practicing
+## O que estou aprendendo com este projeto?
 
-This project is a way to explore **recursion, backtracking, matrix traversal, and input validation**, starting from a challenge we discussed in class.
+Este projeto foi uma oportunidade de explorar, na prática, conceitos importantes de programação, como **recursividade, backtracking, manipulação de matrizes e validação de entradas**, a partir de um desafio discutido em sala de aula.
 
-It also helped me understand why checking the initial input matters and how changing a value during validation requires carefully restoring it afterward.
+Além disso, pude compreender melhor a importância de validar os dados antes de executar um algoritmo e os cuidados necessários ao modificar temporariamente valores durante uma verificação, garantindo que sejam restaurados corretamente.
 
-Thanks for checking it out! Feel free to try the notebook with your own Sudoku puzzles. 🙂
+Foi uma experiência interessante para aprofundar meus conhecimentos em lógica de programação e resolução de problemas!
+
+**Obrigada por conhecer o projeto!** Fique à vontade para testar o notebook com seus próprios desafios de Sudoku. 🙂
